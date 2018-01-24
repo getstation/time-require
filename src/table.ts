@@ -1,4 +1,5 @@
-import { table, TableUserConfig } from 'table';
+import { getBorderCharacters, table, TableUserConfig } from 'table';
+import colors from './colors';
 
 const config: TableUserConfig = {
   columns: {
@@ -6,7 +7,8 @@ const config: TableUserConfig = {
       alignment: 'right'
     },
     1: {
-      alignment: 'left'
+      alignment: 'left',
+      width: 60
     },
     2: {
       alignment: 'right'
@@ -14,9 +16,13 @@ const config: TableUserConfig = {
     3: {
       alignment: 'left'
     }
-  }
+  },
+  border: getBorderCharacters('norc')
 };
 
+const header = [colors.bold('#'), colors.bold('module'), colors.bold('time'), colors.bold('%')];
+
 export default function getTable(data: any[]) {
+  data.unshift(header);
   return table(data, config);
 }

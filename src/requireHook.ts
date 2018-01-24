@@ -34,9 +34,6 @@ function _hooker(name: string, parent: any) {
  */
 function _hook(listener?: Function) {
 	if (typeof listener !== "undefined") {
-		if (typeof listener !== "function") {
-			throw new Error("The optional parameter for hook() should be a function but was " + (typeof listener));
-		}
 		// set the listener
 		_listener = listener;
 	}
@@ -73,7 +70,7 @@ export default function hook(listener: Function, autohook: boolean = true) {
 	_listener = listener;
 	// if autohook (by default),
 	if (autohook) {
-		_hook();
+		_hook(listener);
 	}
 	return {
 		hookedAt: _hookedAt!,

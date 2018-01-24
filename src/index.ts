@@ -1,15 +1,12 @@
 import * as path from 'path';
 import * as prettyMs from 'pretty-ms';
-import getTable from './table';
+import colors, { write } from './colors';
 import requireHook from './requireHook';
+import getTable from './table';
 
 const requireData: RequireData[] = [];
 const TRESHOLD = .01;
 const cwd = process.cwd();
-
-function log(str: string) {
-  console.log(str);
-}
 
 export interface RequireData {
   order: number
@@ -37,6 +34,11 @@ function _hooker(data: any) {
   });
 }
 
+function toPercentage(value: number, numDecimals = 2) {
+  const val100 = value;
+  return val100.toFixed(val100 % 1 === 0 ? 0 : numDecimals) + '%'
+}
+
 function formatTable(tableData: RequireData[], totalTime: number) {
   let counter = 0;
   const data: any[] = tableData
@@ -46,7 +48,15 @@ function formatTable(tableData: RequireData[], totalTime: number) {
     })
     .map(elt => {
       const avg = elt.time / totalTime;
-      return [counter++, elt.label, prettyMs(elt.time), avg];
+      let ms = prettyMs(elt.time);
+      if (elt.time >= 1000) {
+        ms = colors.danger(` ${ms} `);
+      } else if (elt.time >= 500) {
+        ms = colors.warn(` ${ms} `);
+      } else {
+        ms = colors.info(` ${ms} `);
+      }
+      return [colors.bold(counter++), elt.label, ms, toPercentage(avg)];
     });
 
   return getTable(data);
@@ -57,7 +67,7 @@ const hook = requireHook(_hooker);
 export default function print() {
   const startTime = hook.hookedAt;
   const totalTime = Date.now() - startTime.getTime();
-  log(formatTable(requireData, totalTime));
-  // log(chalk.bold.blue("Total require(): ") + chalk.yellow(requireData.length));
-  // log(chalk.bold.blue("Total time: ") + chalk.yellow(prettyMs(totalTime)));
+  write(formatTable(requireData, totalTime));
+  write(colors.bold("Total require(): ") +requireData.length);
+  write(colors.bold("Total time: ") + prettyMs(totalTime));
 }

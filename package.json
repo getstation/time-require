@@ -1,5 +1,5 @@
 {
-	"name": "time-require",
+	"name": "@getstation/time-require",
 	"version": "1.0.0",
 	"description": "Displays the execution time for Node.js modules loading; inspired by @sindresorhus 'time-grunt'",
 	"homepage": "https://github.com/getstation/time-require",
@@ -28,6 +28,7 @@
 		"prepublishOnly": "tsc -p ./ --outDir lib"
 	},
 	"dependencies": {
+		"chalk": "^2.3.0",
 		"pretty-ms": "^3.1.0",
 		"table": "^4.0.2"
 	},
