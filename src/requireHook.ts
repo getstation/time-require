@@ -1,29 +1,20 @@
-/**
- * requireHook - module wrapping a function that register require() listener and returns hook/unhook control
- *
- * @author Ciprian Popa (cyparu)
- * @since 0.0.1
- * @version 0.0.1
- */
-
-"use strict";
-
-var Module = require("module").Module,
-		_load = Module._load,
-		_hookedAt, _listener;
+const Module = require("module").Module;
+const _load = Module._load;
+let _hookedAt: Date | undefined;
+let _listener: Function | undefined;
 
 /**
  * Module hooker function that will replace Module._load and invoke the _listener with module and timing information
  *
  * @function _hooker
  */
-function _hooker(name, parent) {
-	var timeIn = Date.now(),
+function _hooker(name: string, parent: any) {
+	const timeIn = Date.now(),
 			exports = _load.apply(Module, arguments),
 			timeOut = Date.now(),
 			mod = parent.children[parent.children.length - 1]; // should be the last loaded children
 	// call the listener
-	_listener({
+	_listener!({
 		name: name,
 		parent: parent,
 		module: mod,
@@ -38,10 +29,10 @@ function _hooker(name, parent) {
 /**
  * Hook Node's require() so the configured callback will be invocked with additional module and time loading information information
  *
- * @param {Function} [listener] - optional listener if
- * @method hook
+ * @param {Function} listener
+ * @private
  */
-function _hook(listener) {
+function _hook(listener?: Function) {
 	if (typeof listener !== "undefined") {
 		if (typeof listener !== "function") {
 			throw new Error("The optional parameter for hook() should be a function but was " + (typeof listener));
@@ -70,23 +61,22 @@ function _unhook() {
 /**
  * Export a function that set the callback and return hook/unhook control functionality
  *
- * @function
  * @param {Function} listener - require() listener
- * @param {Boolean} [autohook=true] - optional flag telling if the hooking will be started automatically
- * @return hook/unhook control function
+ * @param {boolean} [autohook=true] - optional flag telling if the hooking will be started automatically
+ * @returns {{hookedAt: Date | undefined; hook: (listener?: Function) => void; unhook: () => void}}
  */
-module.exports = function(listener, autohook) {
+export default function hook(listener: Function, autohook: boolean = true) {
 	if (typeof listener !== "function") {
 		throw new Error("The hooking function should be set");
 	}
 	// set the listener
 	_listener = listener;
 	// if autohook (by default),
-	if (autohook !== false) {
+	if (autohook) {
 		_hook();
 	}
 	return {
-		hookedAt: _hookedAt,
+		hookedAt: _hookedAt!,
 		hook: _hook,
 		unhook: _unhook
 	};
